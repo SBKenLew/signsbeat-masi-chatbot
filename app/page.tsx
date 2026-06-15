@@ -86,6 +86,14 @@ function avg(vals: number[]): string {
   return (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1);
 }
 
+// Binary columns store 0/1 flags — convert mean to percentage (×100)
+function avgBinaryOrNumeric(vals: number[]): string {
+  if (!vals.length) return "";
+  const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
+  const isBinary = vals.every((v) => v === 0 || v === 1);
+  return isBinary ? (mean * 100).toFixed(1) : mean.toFixed(1);
+}
+
 // ─── Agents ───────────────────────────────────────────────────────────────────
 
 const AGENTS = [
@@ -304,14 +312,14 @@ export default function MASIChatbot() {
     // Fill form
     setForm((prev) => ({
       ...prev,
-      sbScore:   vals.sbScore.length   ? avg(vals.sbScore)   : prev.sbScore,
-      recovery:  vals.recovery.length  ? avg(vals.recovery)  : prev.recovery,
-      mildStress:vals.mildStress.length? avg(vals.mildStress): prev.mildStress,
-      stress:    vals.stress.length    ? avg(vals.stress)    : prev.stress,
-      hrv:       vals.hrv.length       ? avg(vals.hrv)       : prev.hrv,
-      hr:        vals.hr.length        ? avg(vals.hr)        : prev.hr,
-      deepSleep: vals.deepSleep.length ? avg(vals.deepSleep) : prev.deepSleep,
-      totalSleep:vals.totalSleep.length? avg(vals.totalSleep): prev.totalSleep,
+      sbScore:   vals.sbScore.length   ? avg(vals.sbScore)                        : prev.sbScore,
+      recovery:  vals.recovery.length  ? avgBinaryOrNumeric(vals.recovery)         : prev.recovery,
+      mildStress:vals.mildStress.length? avgBinaryOrNumeric(vals.mildStress)       : prev.mildStress,
+      stress:    vals.stress.length    ? avgBinaryOrNumeric(vals.stress)           : prev.stress,
+      hrv:       vals.hrv.length       ? avg(vals.hrv)                             : prev.hrv,
+      hr:        vals.hr.length        ? avg(vals.hr)                              : prev.hr,
+      deepSleep: vals.deepSleep.length ? avg(vals.deepSleep)                       : prev.deepSleep,
+      totalSleep:vals.totalSleep.length? avg(vals.totalSleep)                      : prev.totalSleep,
     }));
 
     setExtractInfo({ rowCount: filtered.length, dateMin, dateMax, missingCols });
