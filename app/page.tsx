@@ -359,7 +359,6 @@ export default function MASIChatbot() {
 
   async function startSession() {
     setPhase("chat");
-    const csvContext = csvSummaryForAI(csvFiles);
     const periodLabel = period === "7d" ? "Last 7 days" : period === "30d" ? "Last 30 days" : `${dateFrom} → ${dateTo}`;
     const openingMessage =
       `Starting MASI session — metrics averaged from ${extractInfo ? `${extractInfo.rowCount} CSV rows (${periodLabel})` : "manual input"}:\n\n` +
@@ -367,7 +366,7 @@ export default function MASIChatbot() {
       `• Recovery%: ${form.recovery || "?"}%\n• MildStress%: ${form.mildStress || "?"}%\n• Stress%: ${form.stress || "?"}%\n` +
       `• HRV: ${form.hrv || "?"} ms\n• Resting HR: ${form.hr || "?"} bpm\n` +
       `• Deep Sleep: ${form.deepSleep || "?"}%\n• Total Sleep: ${form.totalSleep || "?"} hrs\n` +
-      `• Goal: ${form.goal || "general optimization"}` + csvContext;
+      `• Goal: ${form.goal || "general optimization"}`;
 
     await streamResponse([{ role: "user", content: openingMessage }]);
   }
@@ -391,7 +390,7 @@ export default function MASIChatbot() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json", ...(apiKey ? { "x-deepseek-api-key": apiKey } : {}) },
-        body: JSON.stringify({ messages: msgs, signsbeat: form }),
+        body: JSON.stringify({ messages: msgs, signsbeat: form, csvData: csvSummaryForAI(csvFiles) }),
       });
       if (!res.ok) { const e = await res.json(); throw new Error(e.error || "API error"); }
 

@@ -138,7 +138,7 @@ When enough history exists (3+ CSV sessions), simulate before recommending:
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages, signsbeat } = await req.json();
+    const { messages, signsbeat, csvData } = await req.json();
 
     const apiKey =
       req.headers.get("x-deepseek-api-key") || process.env.DEEPSEEK_API_KEY;
@@ -152,10 +152,8 @@ export async function POST(req: NextRequest) {
 
     const client = new OpenAI({ apiKey, baseURL: "https://api.deepseek.com" });
 
-    const systemWithContext = signsbeat
-      ? `${MASI_SYSTEM_PROMPT}
-
-## USER'S CURRENT SIGNSBEAT DATA
+    const metricsBlock = signsbeat ? `
+## USER'S CURRENT SIGNSBEAT DATA (Period Average)
 Date: ${signsbeat.date || "Today"}
 SB Score: ${signsbeat.sbScore ?? "Not provided"}
 Recovery%: ${signsbeat.recovery ?? "?"}%
@@ -167,8 +165,20 @@ Deep Sleep: ${signsbeat.deepSleep ?? "Not provided"}%
 Total Sleep: ${signsbeat.totalSleep ?? "Not provided"} hrs
 User Goal: ${signsbeat.goal || "General optimization"}
 
-T-1 Rule: Today's scores reflect yesterday's inputs.`
-      : MASI_SYSTEM_PROMPT;
+T-1 Rule: Today's scores reflect yesterday's inputs.` : "";
+
+    const csvBlock = csvData ? `
+
+## FULL CSV HISTORY — ALL AGENTS MUST REFERENCE THIS DATA
+${csvData}
+
+AGENT INSTRUCTIONS FOR CSV DATA:
+- Every agent (Sleep, Nutrition, Exercise, Stress, Biohacking, Circadian, Recovery, Bio Aging, RL Recovery, RL Hormesis, RL Bio Age) has read access to the full CSV history above.
+- Apply T-1 rule to ALL date-indexed rows: the score on row N is caused by inputs on row N-1.
+- RL agents: scan for action→reward patterns across the full date range, identify highest-confidence positive and negative reward episodes, and reference specific date ranges when citing patterns.
+- When any agent answers a question, it must cross-reference the CSV data to validate or challenge its hypothesis before stating a conclusion.` : "";
+
+    const systemWithContext = `${MASI_SYSTEM_PROMPT}${metricsBlock}${csvBlock}`;
 
     const stream = await client.chat.completions.create({
       model: "deepseek-chat",
