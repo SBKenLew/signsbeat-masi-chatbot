@@ -3,6 +3,6 @@
   "buildCommand": "next build",
   "outputDirectory": ".next",
   "env": {
-    "ANTHROPIC_API_KEY": "@anthropic_api_key"
+    "DEEPSEEK_API_KEY": "@deepseek_api_key"
   }
 }
