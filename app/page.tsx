@@ -1,6 +1,22 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
+
+const STORAGE_KEY = "masi_llm_config";
+
+function getStoredApiKey(): string {
+  if (typeof window === "undefined") return "";
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return "";
+    const cfg = JSON.parse(raw);
+    // Only Anthropic is supported by the current API route
+    return cfg.anthropic || "";
+  } catch {
+    return "";
+  }
+}
 
 interface Message {
   role: "user" | "assistant";
@@ -163,9 +179,13 @@ export default function MASIChatbot() {
     setMessages((prev) => [...prev, assistantMsg]);
 
     try {
+      const apiKey = getStoredApiKey();
       const res = await fetch("/api/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(apiKey ? { "x-anthropic-api-key": apiKey } : {}),
+        },
         body: JSON.stringify({ messages: msgs, signsbeat: form }),
       });
 
@@ -231,18 +251,30 @@ export default function MASIChatbot() {
     return (
       <div className="min-h-screen bg-sb-dark flex flex-col">
         {/* Header */}
-        <header className="border-b border-sb-border px-6 py-4 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
-            SB
+        <header className="border-b border-sb-border px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
+              SB
+            </div>
+            <div>
+              <h1 className="text-white font-semibold text-sm tracking-wide">
+                Signsbeat MASI
+              </h1>
+              <p className="text-sb-muted text-xs">
+                Multi-Agent Swarm Intelligence
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-white font-semibold text-sm tracking-wide">
-              Signsbeat MASI
-            </h1>
-            <p className="text-sb-muted text-xs">
-              Multi-Agent Swarm Intelligence
-            </p>
-          </div>
+          <Link
+            href="/settings"
+            className="flex items-center gap-1.5 text-xs text-sb-muted hover:text-sb-text border border-sb-border hover:border-indigo-500 rounded-lg px-3 py-1.5 transition-colors"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            API Settings
+          </Link>
         </header>
 
         {/* Input Form */}
@@ -560,6 +592,16 @@ export default function MASIChatbot() {
           >
             New Session
           </button>
+          <Link
+            href="/settings"
+            className="flex items-center gap-1 text-xs text-sb-muted hover:text-sb-text border border-sb-border rounded-lg px-2.5 py-1 hover:border-indigo-500 transition-colors"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Settings
+          </Link>
         </div>
       </header>
 

@@ -1,8 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
 const MASI_SYSTEM_PROMPT = `You are the Signsbeat MASI (Multi-Agent Swarm Intelligence) health coaching assistant — a next-generation adaptive chatbot that guides users toward their health and longevity goals through targeted, intelligent questioning, not static surveys.
 
 ## CORE IDENTITY
@@ -119,12 +117,18 @@ export async function POST(req: NextRequest) {
   try {
     const { messages, signsbeat } = await req.json();
 
-    if (!process.env.ANTHROPIC_API_KEY) {
+    // Key priority: client-supplied header > server env var
+    const apiKey =
+      req.headers.get("x-anthropic-api-key") || process.env.ANTHROPIC_API_KEY;
+
+    if (!apiKey) {
       return NextResponse.json(
-        { error: "ANTHROPIC_API_KEY not configured" },
-        { status: 500 }
+        { error: "No API key configured. Add your Anthropic key in Settings." },
+        { status: 401 }
       );
     }
+
+    const client = new Anthropic({ apiKey });
 
     // Build context injection for first message
     const systemWithContext = signsbeat
