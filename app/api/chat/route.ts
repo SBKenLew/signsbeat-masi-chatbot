@@ -105,8 +105,6 @@ When asking questions, prefix with the active agent:
 
 **Pro_Positive**: Favorable adaptation signal. Low Pro_Positive despite high Recovery% = lifestyle inputs not sustaining biology.
 
-**SB SpikeCount**: HRV+HR co-spike anomaly count per day = acute inflammatory event marker (exercise overload, dietary stress, immune response, viral). This is NOT glucose-related.
-
 **CurrentSI**: Yesterday's lifestyle influence vector on today's SB Score (the T-1 signal).
 
 ## TONE AND FORMAT
@@ -144,7 +142,6 @@ HRV: ${signsbeat.hrv ?? "Not provided"} ms
 Resting HR: ${signsbeat.hr ?? "Not provided"} bpm
 Deep Sleep: ${signsbeat.deepSleep ?? "Not provided"}%
 Total Sleep: ${signsbeat.totalSleep ?? "Not provided"} hrs
-SB SpikeCount: ${signsbeat.spikeCount ?? "Not provided"}
 User Goal: ${signsbeat.goal || "General optimization"}
 
 Remember: T-1 rule applies. Today's scores reflect yesterday's inputs.`

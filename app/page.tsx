@@ -19,7 +19,6 @@ interface SignsbeatData {
   hr: string;
   deepSleep: string;
   totalSleep: string;
-  spikeCount: string;
   goal: string;
 }
 
@@ -93,7 +92,6 @@ const INITIAL_FORM: SignsbeatData = {
   hr: "",
   deepSleep: "",
   totalSleep: "",
-  spikeCount: "",
   goal: "",
 };
 
@@ -142,7 +140,6 @@ export default function MASIChatbot() {
       `• Resting HR: ${form.hr || "not provided"} bpm\n` +
       `• Deep Sleep: ${form.deepSleep || "not provided"}%\n` +
       `• Total Sleep: ${form.totalSleep || "not provided"} hrs\n` +
-      `• SB SpikeCount: ${form.spikeCount || "not provided"}\n` +
       `• My goal: ${form.goal || "general optimization"}`;
 
     const userMsg: Message = { role: "user", content: openingMessage };
@@ -437,7 +434,7 @@ export default function MASIChatbot() {
               </div>
 
               {/* Sleep */}
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs text-sb-muted mb-1.5 uppercase tracking-wider">
                     Deep Sleep (%)
@@ -465,21 +462,6 @@ export default function MASIChatbot() {
                     value={form.totalSleep}
                     onChange={(e) =>
                       setForm({ ...form, totalSleep: e.target.value })
-                    }
-                    className="w-full bg-sb-dark border border-sb-border rounded-lg px-3 py-2 text-sb-text text-sm focus:outline-none focus:border-indigo-500 placeholder-sb-muted"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-sb-muted mb-1.5 uppercase tracking-wider">
-                    SB SpikeCount
-                  </label>
-                  <input
-                    type="number"
-                    min={0}
-                    placeholder="e.g. 3"
-                    value={form.spikeCount}
-                    onChange={(e) =>
-                      setForm({ ...form, spikeCount: e.target.value })
                     }
                     className="w-full bg-sb-dark border border-sb-border rounded-lg px-3 py-2 text-sb-text text-sm focus:outline-none focus:border-indigo-500 placeholder-sb-muted"
                   />
