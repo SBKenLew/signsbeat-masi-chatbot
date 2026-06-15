@@ -32,14 +32,14 @@ interface ExtractionInfo {
 // ─── Column detection map ─────────────────────────────────────────────────────
 
 const COL_KEYS: Record<keyof Omit<SignsbeatData, "date" | "goal">, string[]> = {
-  sbScore:   ["sb score", "score", "sbscore", "vitalzscore", "vitazlscore", "sb_score", "sbs"],
-  recovery:  ["recovery%", "recovery %", "recovery", "pro_recovery", "pro recovery"],
-  mildStress:["mildstress%", "mild stress%", "mildstress", "mild stress", "pro_mildstress", "pro mild stress"],
-  stress:    ["stress%", "stress %", "stress", "pro_stress", "pro stress"],
+  sbScore:   ["sbscore", "sb score", "sb_score", "score", "vitalzscore", "vitazlscore", "sbs"],
+  recovery:  ["recovery", "recovery%", "recovery %", "pro_recovery", "pro recovery"],
+  mildStress:["mildstress", "mildstress%", "mild stress", "mild stress%", "pro_mildstress", "pro mild stress"],
+  stress:    ["stress", "stress%", "stress %", "pro_stress", "pro stress"],
   hrv:       ["hrv", "hrv (ms)", "heart rate variability", "rmssd", "sdnn"],
-  hr:        ["resting hr", "resting heart rate", "hr (bpm)", "resting_hr", "hr", "heart rate"],
-  deepSleep: ["deep sleep%", "deep sleep (%)", "deep sleep", "deepsleep%", "deepsleep", "deep_sleep"],
-  totalSleep:["total sleep (hrs)", "total sleep (h)", "total sleep", "sleep duration", "sleep (hrs)", "totalsleep", "sleep hours", "total_sleep"],
+  hr:        ["hr", "resting hr", "resting heart rate", "hr (bpm)", "resting_hr", "heart rate"],
+  deepSleep: ["deep", "deep sleep", "deep sleep%", "deep sleep (%)", "deepsleep%", "deepsleep", "deep_sleep"],
+  totalSleep:["total sleep", "totalsleep", "total sleep (hrs)", "total sleep (h)", "sleep duration", "sleep (hrs)", "sleep hours", "total_sleep"],
 };
 
 function findCol(headers: string[], keys: string[]): string | null {
@@ -86,12 +86,13 @@ function avg(vals: number[]): string {
   return (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1);
 }
 
-// Binary columns store 0/1 flags — convert mean to percentage (×100)
+// State columns are either binary 0/1 flags (→ multiply by 100) or already percentages
+// Detect by max value: if max ≤ 1, it's a binary proportion column
 function avgBinaryOrNumeric(vals: number[]): string {
   if (!vals.length) return "";
   const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
-  const isBinary = vals.every((v) => v === 0 || v === 1);
-  return isBinary ? (mean * 100).toFixed(1) : mean.toFixed(1);
+  const max = Math.max(...vals);
+  return max <= 1 ? (mean * 100).toFixed(1) : mean.toFixed(1);
 }
 
 // ─── Agents ───────────────────────────────────────────────────────────────────
