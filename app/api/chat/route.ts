@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { NextRequest, NextResponse } from "next/server";
 
 const MASI_SYSTEM_PROMPT = `You are the Signsbeat MASI (Multi-Agent Swarm Intelligence) health coaching assistant — a next-generation adaptive chatbot that guides users toward their health and longevity goals through targeted, intelligent questioning, not static surveys.
@@ -119,16 +119,19 @@ export async function POST(req: NextRequest) {
 
     // Key priority: client-supplied header > server env var
     const apiKey =
-      req.headers.get("x-anthropic-api-key") || process.env.ANTHROPIC_API_KEY;
+      req.headers.get("x-deepseek-api-key") || process.env.DEEPSEEK_API_KEY;
 
     if (!apiKey) {
       return NextResponse.json(
-        { error: "No API key configured. Add your Anthropic key in Settings." },
+        { error: "No API key configured. Add your DeepSeek key in Settings." },
         { status: 401 }
       );
     }
 
-    const client = new Anthropic({ apiKey });
+    const client = new OpenAI({
+      apiKey,
+      baseURL: "https://api.deepseek.com",
+    });
 
     // Build context injection for first message
     const systemWithContext = signsbeat
@@ -151,14 +154,17 @@ User Goal: ${signsbeat.goal || "General optimization"}
 Remember: T-1 rule applies. Today's scores reflect yesterday's inputs.`
       : MASI_SYSTEM_PROMPT;
 
-    const stream = await client.messages.stream({
-      model: "claude-sonnet-4-6",
+    const stream = await client.chat.completions.create({
+      model: "deepseek-chat",
       max_tokens: 1024,
-      system: systemWithContext,
-      messages: messages.map((m: { role: string; content: string }) => ({
-        role: m.role,
-        content: m.content,
-      })),
+      stream: true,
+      messages: [
+        { role: "system", content: systemWithContext },
+        ...messages.map((m: { role: string; content: string }) => ({
+          role: m.role as "user" | "assistant",
+          content: m.content,
+        })),
+      ],
     });
 
     // Stream the response
@@ -166,12 +172,10 @@ Remember: T-1 rule applies. Today's scores reflect yesterday's inputs.`
     const readable = new ReadableStream({
       async start(controller) {
         for await (const chunk of stream) {
-          if (
-            chunk.type === "content_block_delta" &&
-            chunk.delta.type === "text_delta"
-          ) {
+          const text = chunk.choices[0]?.delta?.content ?? "";
+          if (text) {
             controller.enqueue(
-              encoder.encode(`data: ${JSON.stringify({ text: chunk.delta.text })}\n\n`)
+              encoder.encode(`data: ${JSON.stringify({ text })}\n\n`)
             );
           }
         }

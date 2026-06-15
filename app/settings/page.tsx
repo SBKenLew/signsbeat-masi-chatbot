@@ -5,14 +5,14 @@ import { useRouter } from "next/navigation";
 
 const PROVIDERS = [
   {
-    id: "anthropic",
-    name: "Anthropic",
-    logo: "✦",
-    color: "from-orange-500 to-red-500",
-    border: "border-orange-500/40",
-    placeholder: "sk-ant-api03-...",
-    docsUrl: "https://console.anthropic.com/",
-    description: "Claude Sonnet — default MASI engine",
+    id: "deepseek",
+    name: "DeepSeek",
+    logo: "◎",
+    color: "from-blue-500 to-cyan-500",
+    border: "border-blue-500/40",
+    placeholder: "sk-...",
+    docsUrl: "https://platform.deepseek.com/api_keys",
+    description: "DeepSeek-V3 — default MASI engine",
   },
   {
     id: "openai",
@@ -25,23 +25,23 @@ const PROVIDERS = [
     description: "GPT-4o / GPT-4 Turbo",
   },
   {
-    id: "gemini",
-    name: "Google Gemini",
-    logo: "◈",
-    color: "from-blue-500 to-indigo-500",
-    border: "border-blue-500/40",
-    placeholder: "AIzaSy...",
-    docsUrl: "https://aistudio.google.com/app/apikey",
-    description: "Gemini 1.5 Pro / Flash",
+    id: "anthropic",
+    name: "Anthropic",
+    logo: "✦",
+    color: "from-orange-500 to-red-500",
+    border: "border-orange-500/40",
+    placeholder: "sk-ant-api03-...",
+    docsUrl: "https://console.anthropic.com/",
+    description: "Claude Sonnet",
   },
 ];
 
-type ProviderId = "anthropic" | "openai" | "gemini";
+type ProviderId = "deepseek" | "openai" | "anthropic";
 
 interface StoredKeys {
-  anthropic: string;
+  deepseek: string;
   openai: string;
-  gemini: string;
+  anthropic: string;
   active: ProviderId;
 }
 
@@ -49,28 +49,28 @@ const STORAGE_KEY = "masi_llm_config";
 
 function loadConfig(): StoredKeys {
   if (typeof window === "undefined")
-    return { anthropic: "", openai: "", gemini: "", active: "anthropic" };
+    return { deepseek: "", openai: "", anthropic: "", active: "deepseek" };
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { anthropic: "", openai: "", gemini: "", active: "anthropic" };
+    if (!raw) return { deepseek: "", openai: "", anthropic: "", active: "deepseek" };
     return JSON.parse(raw);
   } catch {
-    return { anthropic: "", openai: "", gemini: "", active: "anthropic" };
+    return { deepseek: "", openai: "", anthropic: "", active: "deepseek" };
   }
 }
 
 export default function SettingsPage() {
   const router = useRouter();
   const [config, setConfig] = useState<StoredKeys>({
-    anthropic: "",
+    deepseek: "",
     openai: "",
-    gemini: "",
-    active: "anthropic",
+    anthropic: "",
+    active: "deepseek",
   });
   const [showKey, setShowKey] = useState<Record<ProviderId, boolean>>({
-    anthropic: false,
+    deepseek: false,
     openai: false,
-    gemini: false,
+    anthropic: false,
   });
   const [saved, setSaved] = useState(false);
   const [copied, setCopied] = useState(false);

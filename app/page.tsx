@@ -11,8 +11,7 @@ function getStoredApiKey(): string {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return "";
     const cfg = JSON.parse(raw);
-    // Only Anthropic is supported by the current API route
-    return cfg.anthropic || "";
+    return cfg.deepseek || "";
   } catch {
     return "";
   }
@@ -184,7 +183,7 @@ export default function MASIChatbot() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(apiKey ? { "x-anthropic-api-key": apiKey } : {}),
+          ...(apiKey ? { "x-deepseek-api-key": apiKey } : {}),
         },
         body: JSON.stringify({ messages: msgs, signsbeat: form }),
       });
