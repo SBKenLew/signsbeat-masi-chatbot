@@ -1,8 +1,5 @@
 {
   "framework": "nextjs",
   "buildCommand": "next build",
-  "outputDirectory": ".next",
-  "env": {
-    "DEEPSEEK_API_KEY": "@deepseek_api_key"
-  }
+  "outputDirectory": ".next"
 }
